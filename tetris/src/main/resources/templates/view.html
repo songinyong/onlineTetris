@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<script>
+	$(document).ready(function(){
+		
+
+	});
+
+
+	function startGame() {
+		
+
+		
+		
+		
+					$.ajax({
+		  type: "GET"
+		, async: false
+		, url : "/start"
+		, dataType : "json"
+		, data : param
+		, success : function(rtnData){
+			console.log("success")
+		}
+		, error: function (request, status, error){
+			console.log("error log [status] ", status);
+			console.log("error log [error] ", error);
+			alert("관리자에게 문의바랍니다.");
+		}
+	});
+	}
+	
+	function startGameCallBack() {
+		
+	}
+
+	function leftMove() {
+			$.ajax({
+		  type: "GET"
+		, async: false
+		, url : "/leftMove"
+		, dataType : "json"
+		, data : param
+		, success : function(rtnData){
+			console.log(success)
+		}
+		, error: function (request, status, error){
+			console.log("error log [status] ", status);
+			console.log("error log [error] ", error);
+			alert("관리자에게 문의바랍니다.");
+		}
+	});
+	
+	}
+	
+	function leftMoveCallBack() {
+		
+	}
+	
+	
+
+
+	
+	function project2(ages, registeredEarlys) {
+		
+		let raceNumber = Math.floor(Math.random() * 1000);
+		let registeredEarly = registeredEarlys;
+		let age = ages;
+		
+		if(age >18 && registeredEarly){raceNumber += 1000};
+		if (registeredEarly == true && age > 18) {
+		  console.log(`Race at 9:30 am, Race number :${raceNumber}`);
+		} else if (registeredEarly == false && age > 18) {
+		  console.log(`Race at 11:00 am, Race number : ${raceNumber}`);
+		} else if (age < 18) {
+		  console.log(`Youth regsitrants run at 12:30 pm, Race number : ${raceNumber}`);
+		} else {
+		  console.log('runner, see the registration desk');
+		}
+	}	
+		const getUserChoice = (userInput) => {
+			userInput = userInput.toLowerCase();
+			if(userInput == 'rock') {
+				return 'rock'
+			}
+			else if(userInput == 'paper') {
+				return 'paper'
+			}
+			else if(userInput == 'scissors') {
+				return 'scissors'
+			}
+			else {
+				console.log("에러 발생 rock, paper, scissors 만 입력바랍니다")
+			}
+			
+		}
+		
+		const getComputerChoice = () => {
+			var sel = Math.floor(Math.random()*3)
+			if(sel == 0) {
+				return 'rock'
+			}
+			else if(se1 == 1) {
+				return 'paper'
+			}
+			else if(sel == 2) {
+				return 'scissors'
+			}
+		}
+		
+		const determineWinner = (userChoice, computerChoice ) => {
+			if(userChoice =='rock') {
+				if(computerChoice =='paper') {
+					return 'computer win'
+				}
+				else {
+					return 'user won'
+				}				
+			}
+			else if(userChoice =='rock') {
+				if(computerChoice =='scissors') {
+					return 'computer win'
+				}
+				else if(computerChoice =='rock') {
+					return 'user won'
+				}					
+				
+			}
+			else if(userChoice =='scissors') {
+				if(computerChoice =='rock') {
+					return 'computer win'
+				}
+				else if(computerChoice =='paper') {
+					return 'user won'
+				}						
+				
+			}
+			else if(userChoice =='bomb') {
+				return 'user won'
+			}
+			else {
+				
+			}			
+			
+		}
+		
+		const playGame = () => {
+			var input =prompt()
+			userChoice = getUserChoice(input)
+			computerChoice = getComputerChoice()
+			
+			result = determineWinner(userChoice, computerChoice ) 
+			console.log(result);
+				
+			
+		}
+		
+		
+		
+		const getSleepHours = day => 
+	{
+  if (day === 'monday') {
+    return 8;
+  } else if (day === 'tuesday') { 
+    return 7;
+  } else if (day === 'wednesday') {
+    return 6; 
+  } else if (day === 'thursday') {
+    return 6; 
+  } else if (day === 'friday') {
+    return 4; 
+  } else if (day === 'saturday') {
+    return 8;
+  } else if (day === 'sunday') {
+    return 8;
+  }  
+  
+  else {
+    console.log("에러발생")
+  }
+  
+}
+
+
+const getActualSleepHours = () => 
+  getSleepHours('monday') + getSleepHours('tuesday') + getSleepHours('wednesday') + getSleepHours('thursday') + getSleepHours('friday') + getSleepHours('saturday') + getSleepHours('sunday'); 
+
+//Test getActual SleepHours Function
+//console.log(getActualSleepHours());
+
+const getIdealSleepHours = idealHours => 
+  idealHours * 7;
+
+
+const calculateSleepDebt = () => {
+  let actualSleepHours = getActualSleepHours();
+  let idealHours = getIdealSleepHours(8);
+  if (actualSleepHours === idealHours) {
+    console.log(`실제 수면시간은 (${actualSleepHours} 시간으로 1주일동안 이상적인 수면 시간을 가졌다. )`); 
+} else if (actualSleepHours < idealHours) {
+  console.log(`실제 수면시간은 (${actualSleepHours} hours)시간으로 너는 ${idealHours - actualSleepHours} 시간만큼 수면이 부족하다`);
+} else if (actualSleepHours > idealHours) {
+  console.log(`실제 수면시간은 (${actualSleepHours} hours)시간으로 너는 ${actualSleepHours - idealHours} 시간만큼 수면이 부족하다`);
+} else {
+  
+}
+}
+
+calculateSleepDebt();
+	
+	
+</script>
+<html>
+<head>
+	<title>테트리스</title>
+	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+</head>
+<body>
+	<h1>테트리스 플레이 화면 테스트중</h1>
+
+<table>
+	<tbody id="body"></tbody>
+</table>
+</body>
+</html>

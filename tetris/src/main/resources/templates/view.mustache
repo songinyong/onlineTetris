@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<script src="https://code.jquery.com/jquery-3.3.1.min.js"></script>
+
+
+<script type="text/javascript">
+
+
+
+	$(document).ready(function(){
+		// 웹 소켓 초기화
+   		webSocketInit();
+		
+		
+		$("#tetrisBody").empty();
+		var htmlstr = "";
+		for(var i=0; i<10; i++) {
+			htmlstr += "<tr><td>|</td>"
+			for(var j=0; j<6; j++) {
+				htmlstr += "<td id=\"td" + (i*7+j)+ "\">&nbsp; </td>"
+			}
+			
+			htmlstr += "<td>|</td><tr>"
+		}
+		$("#tetrisBody").html(htmlstr)
+	});
+//웹소켓 생성
+var webSocket;
+
+function webSocketInit()
+{
+    webSocket = new WebSocket("ws://localhost:8080/websocket");
+	webSocket.onopen = function(event) { socketOpen(event);};
+	webSocket.onclose = function(event) { socketClose(event);};
+	webSocket.onmessage = function(event) { socketMessage(event);};
+	webSocket.onerror = function(event) { socketError(event);};
+}  
+  //웹소켓 연결
+  function socketOpen(event){
+     console.log("연결 완료");
+  }
+  
+  //웹소켓 닫힘
+  function socketClose(event){
+  	 console.log("웹소켓이 닫혔습니다.");
+  	 
+     // 웹소켓이 닫혀있으면 재연결을 시도합니다.
+     // webSocket이 close되면 오브젝트의 속성, 메서드가 사라지기 때문에,
+     // 해당 함수를 호출하여 초기화하여 줍니다.
+     webSocketInit(); 
+  }
+  
+  //메시지를 송신할 때 사용
+  function socketMsgSend(str){
+     // 메시지 포맷
+     var msg = {
+     	type : "message",
+        value : str
+ 
+     }
+     
+     // 세션리스트에 메시지를 송신한다.
+     webSocket.send(str)
+  }
+  
+  //웹소켓 메시지 수신
+  function socketMessage(event){
+  	 //var msg = JSON.parse(event.data);
+     //           console.log("server", JSON.stringify(msg.content));
+  	  var receiveData = event.data; // 수신 data
+  	  //var json = JSON.stringify(receiveData);
+  	  var obj2 = JSON.parse(receiveData);
+      console.log("수신된 msg : " + obj2);
+      
+
+      $("#tetrisBody").empty();
+      	var htmlstr = "";
+		for(var i=0; i<10; i++) {
+			htmlstr += "<tr><td>|</td>"
+			for(var j=0; j<6; j++) {
+				if(obj2[(i*6+j).toString()])
+					htmlstr += "<td id=\"td" + (i*6+j)+ "\">*</td>"
+				else 
+					htmlstr += "<td id=\"td" + (i*6+j)+ "\"> &nbsp; </td>"
+			}
+			
+			htmlstr += "<td>|</td><tr>"
+		}
+		
+		//블럭 위치 표시
+		$("#tetrisBody").html(htmlstr)
+		for(var i=0; i<4; i++) {
+			var ds = "td" + obj2.block[(i).toString()]
+			
+			$('#' +ds).html("*");
+		
+		}
+
+		//스코어 표시
+		console.log(obj2.score)
+		$("#score").text(obj2.score)
+		
+  }
+  
+  //웹소켓 에러
+  function socketError(event){
+  	alert("에러가 발생하였습니다.");
+  }
+  
+  //웹소켓 종료
+  function disconnect(){
+  	webSocket.close();
+  }
+
+	function startGame() {
+					$.ajax({
+		  type: "GET"
+		, async: false
+		, url : "/start"
+		, success : function(){
+			console.log("success")
+		}
+		, error: function (request, status, error){
+			console.log("error log [status] ", status);
+			console.log("error log [error] ", error);
+			
+		}
+	});
+	}
+	
+	function startGameCallBack() {
+		
+	}
+
+
+
+	function leftMove() {
+			$.ajax({
+		  type: "GET"
+		, async: false
+		, url : "/leftMove"
+		, dataType : "json"
+		, success : function(){
+			console.log("success")
+		}
+		, error: function (request, status, error){
+			console.log("error log [status] ", status);
+			console.log("error log [error] ", error);
+			
+		}
+	});
+	}
+	
+	function leftMoveCallBack() {
+		
+	}
+	
+	function rightMove() {
+			$.ajax({
+		  type: "GET"
+		, async: false
+		, url : "/rightMove"
+		, dataType : "json"
+		, success : function(){
+			console.log("success")
+		}
+		, error: function (request, status, error){
+			console.log("error log [status] ", status);
+			console.log("error log [error] ", error);
+			
+		}
+	});
+	}
+	
+	function rightMoveCallBack() {
+		
+	}
+
+</script>
+
+
+<html>
+<head>
+
+	<title>테트리스</title>
+	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+</head>
+<body>
+	<h1>테트리스 플레이 화면 테스트중</h1>
+	<button onclick="socketMsgSend('start')">게임시작</button>
+	<button onclick="socketMsgSend('left')">왼쪽이동</button>
+	<button onclick="socketMsgSend('right')">오른쪽이동</button>
+	<button onclick="socketMsgSend('convert')">블록회전</button>
+	<div><h2>스코어</h2><p id="score"></p></div>
+<table>
+	<tbody id="tetrisBody"></tbody>
+</table>
+</body>
+</html>
