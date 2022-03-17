@@ -23,7 +23,7 @@ public class Gaming {
 	
 	Random random = new Random() ;
 	
-	private static Block laningBlock ;
+	private Block laningBlock ;
 	
 	//게임판으로 사용됨
 	private  HashMap<Integer, Boolean> hash = new HashMap<Integer, Boolean>();
