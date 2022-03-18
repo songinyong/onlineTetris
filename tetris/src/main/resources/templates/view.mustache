@@ -28,6 +28,7 @@ var webSocket;
 
 function webSocketInit()
 {
+    //webSocket = new WebSocket("ws://localhost:8080/websocket");
     webSocket = new WebSocket("ws://3.35.55.132:8080/websocket");
 	webSocket.onopen = function(event) { socketOpen(event);};
 	webSocket.onclose = function(event) { socketClose(event);};
@@ -51,6 +52,10 @@ function webSocketInit()
   
   //메시지를 송신할 때 사용
   function socketMsgSend(str){
+  
+  	if(str =='start') {
+  		$("#score").empty()
+  		}
      // 메시지 포맷
      var msg = {
      	type : "message",
@@ -69,7 +74,6 @@ function webSocketInit()
   	  var receiveData = event.data; // 수신 data
   	  //var json = JSON.stringify(receiveData);
   	  var obj2 = JSON.parse(receiveData);
-      console.log("수신된 msg : " + obj2);
       
 
       $("#tetrisBody").empty();
@@ -96,8 +100,8 @@ function webSocketInit()
 		}
 
 		//스코어 표시
-		console.log(obj2.score)
-		$("#score").text(obj2.score)
+		
+		$("#score").text("스코어: "+obj2.score)
 		
   }
   
@@ -190,7 +194,7 @@ function webSocketInit()
 	<button onclick="socketMsgSend('left')">왼쪽이동</button>
 	<button onclick="socketMsgSend('right')">오른쪽이동</button>
 	<button onclick="socketMsgSend('convert')">블록회전</button>
-	<div><h2>스코어</h2><p id="score"></p></div>
+	<div><h2 id="score" >스코어:</h2></div>
 <table>
 	<tbody id="tetrisBody"></tbody>
 </table>

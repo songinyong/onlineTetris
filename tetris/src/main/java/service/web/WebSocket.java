@@ -50,7 +50,6 @@ public class WebSocket {
             sessionList.add(session);
             soloMap.put(session, new Gaming() );
          
-            
            /* HashMap<Session, Gaming> map = new HashMap<Session, Gaming>();
               map.put(session, new Gaming());
               gamgingList.add(map);
@@ -65,13 +64,10 @@ public class WebSocket {
             }
             */
 
-
-            
         }
        
     }
     
-
     /**
      * 웹소켓 메시지(From Client) 수신하는 경우 호출
      */
@@ -84,8 +80,16 @@ public class WebSocket {
             //System.out.println("message is arrived. sessionId == [" + session + "] / message == [" + message + "]");
             
             if(message.equals("start")) {
-            	
-            	soloMap.get(session).gameStart();
+            	//처음 시작할때
+            	if(!soloMap.get(session).getStartCheck())
+            		
+            		soloMap.get(session).gameStart();
+            	else {
+            		
+            		//재시작할때
+            		soloMap.put(session, new Gaming() );
+            		soloMap.get(session).gameStart();
+            	}
             }
             else if(message.equals("left")) {
 	            if(soloMap.get(session).getStartCheck())
