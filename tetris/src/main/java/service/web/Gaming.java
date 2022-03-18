@@ -84,7 +84,7 @@ public class Gaming {
 		
 		int rand =random.nextInt(2);
 		
-		System.out.println("생성된 블럭 "+rand);
+		
 		
 		try {
 		if(rand ==0) {
@@ -162,7 +162,6 @@ public class Gaming {
 		}
 		
 		//완성된 줄은 인식
-		
 		//스코어 반영
 		if(successLine.size() ==0) {
 			
@@ -174,13 +173,8 @@ public class Gaming {
 			score += Math.pow(2 , successLine.size());
 		}
 		
-		System.out.println("완료된 행수"+ successLine.size());
-		System.out.println("score"+score);
-		
-		//스코어 반영된 칸들 비활성화 
 		for(int i=successLine.size()-1; i>-1; i--) {
 			int ten = successLine.get(i);
-			System.out.println("비활성화 시작");
 			for(int j =0 ; j < columns; j++) {
 				hash.put(ten*columns+j, false);
 			}	 
@@ -189,10 +183,8 @@ public class Gaming {
 		
 		//완성된 줄이 있다면 활성화 블록들을 아래로 내림
 		// 두줄 이상일때, 한줄일때 구분
-		if(successLine.size() >0) {
-			System.out.println("칸들 아래로 내리기 시작");
-			for(int i=successLine.size()-1; i>-1; i--) {
-				 System.out.println("칸들 아래로 내리기 시작");
+		if(successLine.size() >0) {		
+			for(int i=successLine.size()-1; i>-1; i--) {	 
 				for(int j=(rows-1)*columns-1; j>-1; j--) {
 					if(!hash.get(j+columns).booleanValue() && hash.get(j).booleanValue()) {
 						hash.put(j, false);
@@ -227,24 +219,23 @@ public class Gaming {
 	}
 	
 	
-	//컨트롤러가 1초마다 스케줄러로 호출하는 부분 true 게임 진행중 false 게임 엔드
+	//컨트롤러로 받은 블럭 조작 신호를 소켓에 전달하는 함수
 	public boolean gaming() {
 		if(checkBoard(laningBlock)) {
 			rowSuccess();
 			if(endCheck()) return false;
 			else {
-				//게임이 안끝났다면 신규 블록을 생성한다.
+				//게임이 안끝났다면 신규 블록을 생성한다..
 				makeBlock();
 				return true;
 			}
 			
 		}
-		//블록이 아직 하강중일때
+		//게임이 안끝났다면 신규 블록을 생성한다.
 		else return true ;
 			
 	}
 
-		
 	//블록 left 이동 이벤트
 	public void leftMove() {
 		for(Node n : laningBlock.leftMoveBlock()) {
@@ -256,7 +247,7 @@ public class Gaming {
 		}
 	}
 	
-	//블록 right 이동 이벤트
+	//블록 left 이동 이벤트
 	public void rightMove() {
 		for(Node n : laningBlock.rightMoveBlock()) {
 			if(n.getY() >columns-1 || n.getY() <0 || n.getY() >rows*columns-1  || hash.get((n.getX())*columns+n.getY()) ) {
