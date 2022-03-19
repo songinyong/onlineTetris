@@ -4,9 +4,7 @@
 
 <script type="text/javascript">
 
-	//후에 사용자가 지정하도록함
-	var rows = 10;
-	var columns = 6;
+
 
 	$(document).ready(function(){
 		// 웹 소켓 초기화
@@ -15,10 +13,10 @@
 		
 		$("#tetrisBody").empty();
 		var htmlstr = "";
-		for(var i=0; i<rows; i++) {
+		for(var i=0; i<10; i++) {
 			htmlstr += "<tr><td>|</td>"
-			for(var j=0; j<columns; j++) {
-				htmlstr += "<td id=\"td" + (i*columns+j)+ "\">&nbsp; </td>"
+			for(var j=0; j<6; j++) {
+				htmlstr += "<td id=\"td" + (i*7+j)+ "\">&nbsp; </td>"
 			}
 			
 			htmlstr += "<td>|</td><tr>"
@@ -30,7 +28,7 @@ var webSocket;
 
 function webSocketInit()
 {
-    webSocket = new WebSocket("ws://localhost:8080/websocket");
+	webSocket = new WebSocket("ws://localhost:8080/websocket");
     //webSocket = new WebSocket("ws://3.35.55.132:8080/websocket");
 	webSocket.onopen = function(event) { socketOpen(event);};
 	webSocket.onclose = function(event) { socketClose(event);};
@@ -54,10 +52,6 @@ function webSocketInit()
   
   //메시지를 송신할 때 사용
   function socketMsgSend(str){
-  
-  	if(str =='start') {
-  		$("#score").empty()
-  		}
      // 메시지 포맷
      var msg = {
      	type : "message",
@@ -76,29 +70,22 @@ function webSocketInit()
   	  var receiveData = event.data; // 수신 data
   	  //var json = JSON.stringify(receiveData);
   	  var obj2 = JSON.parse(receiveData);
+      console.log("수신된 msg : " + obj2);
       
 
       $("#tetrisBody").empty();
       	var htmlstr = "";
-		for(var i=0; i<rows; i++) {
+		for(var i=0; i<10; i++) {
 			htmlstr += "<tr><td>|</td>"
-			for(var j=0; j<columns; j++) {
-				if(obj2[(i*columns+j).toString()])
-					htmlstr += "<td id=\"td" + (i*columns+j)+ "\">*</td>"
+			for(var j=0; j<6; j++) {
+				if(obj2[(i*6+j).toString()])
+					htmlstr += "<td id=\"td" + (i*6+j)+ "\">*</td>"
 				else 
-					htmlstr += "<td id=\"td" + (i*columns+j)+ "\"> &nbsp; </td>"
+					htmlstr += "<td id=\"td" + (i*6+j)+ "\"> &nbsp; </td>"
 			}
 			
-			htmlstr += "<td>|</td></tr>"
-						
+			htmlstr += "<td>|</td><tr>"
 		}
-		
-			htmlstr += "<tr><td>&nbsp;</td>"
-			
-			for(var i=1; i<columns+1; i++) {
-				htmlstr += "<td>=</td>"
-			}
-			htmlstr += "<td>&nbsp;</td></tr>"
 		
 		//블럭 위치 표시
 		$("#tetrisBody").html(htmlstr)
@@ -110,8 +97,8 @@ function webSocketInit()
 		}
 
 		//스코어 표시
-		
-		$("#score").text("스코어: "+obj2.score)
+		console.log(obj2.score)
+		$("#score").text(obj2.score)
 		
   }
   
@@ -204,7 +191,7 @@ function webSocketInit()
 	<button onclick="socketMsgSend('left')">왼쪽이동</button>
 	<button onclick="socketMsgSend('right')">오른쪽이동</button>
 	<button onclick="socketMsgSend('convert')">블록회전</button>
-	<div><h2 id="score" >스코어:</h2></div>
+	<div><h2>스코어:<p id="score"></p></h2></div>
 <table>
 	<tbody id="tetrisBody"></tbody>
 </table>

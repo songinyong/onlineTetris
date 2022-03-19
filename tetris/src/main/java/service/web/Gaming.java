@@ -25,6 +25,9 @@ public class Gaming {
 	
 	private Block laningBlock ;
 	
+	//블럭이 생성되었나 체크함 (블럭 생성 안되어있을떄는 블록 움직이는 이벤트 반응안함)
+	private boolean makedBlock = false;
+	
 	//게임판으로 사용됨
 	private  HashMap<Integer, Boolean> hash = new HashMap<Integer, Boolean>();
 	
@@ -63,6 +66,10 @@ public class Gaming {
 		return score;
 	}
 	
+	public boolean getMakedBlock() {
+		return makedBlock;
+	}
+	
 	public boolean gameStart() {
 	
 		//점수판으로 사용되는 hashMap 초기화
@@ -75,6 +82,8 @@ public class Gaming {
 		
 		//게임판 초기화후 블록 생성
 		makeBlock();
+		
+		makedBlock = true;
 		startCheck = true;
 		
 		return true ;
@@ -84,8 +93,7 @@ public class Gaming {
 		
 		int rand =random.nextInt(2);
 		
-		
-		
+
 		try {
 		if(rand ==0) {
 			laningBlock = new UBlock(columns) ;
@@ -111,6 +119,7 @@ public class Gaming {
 			//블록이 마지막 줄에 닿았을때
 			
 			if(block.getBlock().get(i).getX()*columns + block.getBlock().get(i).getY() > (rows-1)*columns -1) {
+				
 				for(int j=0; j<block.getBlock().size(); j++) {
 					hash.put(block.getBlock().get(j).getX()*columns + block.getBlock().get(j).getY(), true);
 				}
@@ -173,26 +182,30 @@ public class Gaming {
 			score += Math.pow(2 , successLine.size());
 		}
 		
-		for(int i=successLine.size()-1; i>-1; i--) {
-			int ten = successLine.get(i);
+		for(int i : successLine) {
+			//int sucRow = successLine.get(i);
 			for(int j =0 ; j < columns; j++) {
-				hash.put(ten*columns+j, false);
+				hash.put(i*columns+j, false);
 			}	 
+
 		}				
 		
 		
 		//완성된 줄이 있다면 활성화 블록들을 아래로 내림
-		// 두줄 이상일때, 한줄일때 구분
 		if(successLine.size() >0) {		
-			for(int i=successLine.size()-1; i>-1; i--) {	 
-				for(int j=(rows-1)*columns-1; j>-1; j--) {
-					if(!hash.get(j+columns).booleanValue() && hash.get(j).booleanValue()) {
-						hash.put(j, false);
-						hash.put(j+columns, true);
+			for(int k :successLine) {
+			for(int i=k*columns+columns-1; i>-1; i--) {	 
+				//여기도 마지막줄 일떄랑 구분
+					if(i > (rows-1)*columns -1 ) {
+						
+					}
+					else if(!hash.get(i+columns).booleanValue() && hash.get(i).booleanValue()) {
+						hash.put(i, false);
+						hash.put(i+columns, true);
 					}
 				}
 			}
-		
+							
 		}
 		//완성된 줄이 없다면 패스
 		else {
@@ -219,21 +232,27 @@ public class Gaming {
 	}
 	
 	
-	//컨트롤러로 받은 블럭 조작 신호를 소켓에 전달하는 함수
+	//webSocket에서 게임 상태를 받아옴
 	public boolean gaming() {
+		//블록이 떨어졌을때
 		if(checkBoard(laningBlock)) {
+			makedBlock = false;
 			rowSuccess();
 			if(endCheck()) return false;
 			else {
-				//게임이 안끝났다면 신규 블록을 생성한다..
+				//게임이 안끝났다면 신규 블록을 생성한다.
 				makeBlock();
+				makedBlock = true;
 				return true;
 			}
 			
 		}
-		//게임이 안끝났다면 신규 블록을 생성한다.
-		else return true ;
+		
+		//블록이 떨어지는중
+		else {
 			
+			return true ;
+		}
 	}
 
 	//블록 left 이동 이벤트
@@ -247,7 +266,7 @@ public class Gaming {
 		}
 	}
 	
-	//블록 left 이동 이벤트
+	//블록 right 이동 이벤트
 	public void rightMove() {
 		for(Node n : laningBlock.rightMoveBlock()) {
 			if(n.getY() >columns-1 || n.getY() <0 || n.getY() >rows*columns-1  || hash.get((n.getX())*columns+n.getY()) ) {
@@ -261,17 +280,35 @@ public class Gaming {
 	
 	//블록 회전 이벤트
 	public void convertBlock() {
+		boolean firstLine = false;
+		for(Node n : laningBlock.getBlock() ) {
+			if(n.getX()==0) {
+				firstLine = true;
+				break;
+			}
+		}
 		
+		if(firstLine) {
+			// 아직 첫줄일때는 하강하지 않는다.
+		}
+		else {
 		for(Node n : laningBlock.convertBlock()) {
 			
-			if(n.getX() <0 || n.getX() >rows*columns-1 || n.getY() >columns-1 || n.getY() <0 || n.getY() >rows*columns-1  || hash.get((n.getX())*columns+n.getY()) ) {
+			if((n.getX())*columns+n.getY()> rows*columns-1 ) {
+				laningBlock.backupBlock();
+				break;
+			}
+			else if(n.getX() <0 || n.getX() >rows*columns-1 || n.getY() >columns-1 || n.getY() <0 || n.getY() >rows*columns-1  || hash.get((n.getX())*columns+n.getY()) ) {
+				
+	
+				
 				laningBlock.backupBlock();
 				
 				break;
 			}
 			
 		}
-		
+		}
 	}
 	
 	//현재 블록 위치 알려줌

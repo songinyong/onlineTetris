@@ -72,7 +72,7 @@ public class WebSocket {
      * 웹소켓 메시지(From Client) 수신하는 경우 호출
      */
     @OnMessage
-    public String handleMessage(String message, Session session) {
+    public void handleMessage(String message, Session session) {
 
         if (session != null) {
             String sessionId = session.getId();
@@ -91,17 +91,23 @@ public class WebSocket {
             		soloMap.get(session).gameStart();
             	}
             }
-            else if(message.equals("left")) {
-	            if(soloMap.get(session).getStartCheck())
+            else if(message.equals("left") && soloMap.get(session).getMakedBlock() ) {
+	            if(soloMap.get(session).getStartCheck()) {
 	            	soloMap.get(session).leftMove();
+	            	session.getAsyncRemote().sendText(makeJson(session));
+	            }
             }
-            else if(message.equals("right")) {
-            	if(soloMap.get(session).getStartCheck())	
+            else if(message.equals("right") && soloMap.get(session).getMakedBlock() ) {
+            	if(soloMap.get(session).getStartCheck()) {
             		soloMap.get(session).rightMove();
+            		session.getAsyncRemote().sendText(makeJson(session));
+            	}
             }
-            else if(message.equals("convert")) {
-            	if(soloMap.get(session).getStartCheck())          	
+            else if(message.equals("convert") && soloMap.get(session).getMakedBlock() ) {
+            	if(soloMap.get(session).getStartCheck())  {        	
             		soloMap.get(session).convertBlock();
+            		session.getAsyncRemote().sendText(makeJson(session));
+            	}
             }
             else {
 
@@ -109,7 +115,7 @@ public class WebSocket {
             
         }
 
-        return null;
+       
     }
     
 
@@ -171,22 +177,19 @@ public class WebSocket {
         return true;
     }
     
-    
-    
+      
   //스케줄러로 1초마다 gaming 및 블록 렌딩을 호출하여 게임상태 점검
 	@Scheduled(cron = "0/1 * * * * ?")
 	private void gameCheck() throws JsonProcessingException{
 		
 		for(int k=0; k<sessionList.size(); k++) {
 
-			
+			try {
 			if(soloMap.get(sessionList.get(k)).getStartCheck()) {
-			
+		//게임 엔드일경우
 		if(!soloMap.get(sessionList.get(k)).gaming()) {
 			
-			//System.out.println("게임끝");
-
-			
+			//게임 엔드일 경우 패스
 		}
 		else {
 			//현재 진행중인 게임판 데이터 전달
@@ -197,21 +200,37 @@ public class WebSocket {
 			String json = mapper.writeValueAsString(curHash);
 
 			sessionList.get(k).getAsyncRemote().sendText(json);
-		
-		
-		}
 
-		
-		
+		}
+	
 		} else {
 			
-			//게임 시작 안해 패스함
+		//게임 시작 안한 객체는 바로 패스
 		}
+			} //중간에 로그아웃으로 nullPoint exception이 발생할 수 있음
+			catch (NullPointerException e) {
+				
+			}
 			
 		}
-
-
 		
 	}
+	
+	//현재 게임 상태 객체로 만들어서 반환
+	public String makeJson(Session session) {
+		HashMap curHash = soloMap.get(session).getHash();
+		curHash.put("block", soloMap.get(session).getBlockLoc() );
+		curHash.put("score", soloMap.get(session).getScore() );
+		ObjectMapper mapper = new ObjectMapper();
+		try {
+			String json = mapper.writeValueAsString(curHash);
+			return json ;
+		} catch (JsonProcessingException e) {
+			
+			return "";
+		}
+	}
+	
+	
 	}	
 
