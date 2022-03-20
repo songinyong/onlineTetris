@@ -26,57 +26,77 @@ public class UBlock extends ParentBlock implements Block{
 	@Override
 	public List<Node> convertBlock() {
 		
+		block.clear();
+		for(Node n : convertBlock )
+			block.add(new Node(n.getX(), n.getY()));
+		 
+		return block ;
+	
+	}
+	
+	@Override
+	public List<Node> priorConvertBlock() {
+		convertBlock.clear();
+		for(Node n : block )
+			convertBlock.add(new Node(n.getX(), n.getY()));
+		
+		return convertBlock(convertBlock) ;
+	}
+	
+	private List<Node> convertBlock(List<Node> blocks) {
+
 		if(convertCount ==0)
 			convertCount+=1;
 		
-		//if(!convertBlock.isEmpty())
-			convertBlock.clear();
-		for(Node n : block )
-			convertBlock.add(new Node(n.getX(), n.getY()));
-		 
-	
 		if(convertCount ==1) {
 			
-			block.get(0).setX(block.get(0).getX()-1);
-			block.get(0).setY(block.get(0).getY()-1);
-			block.get(1).setX(block.get(1).getX()-1);
-			block.get(1).setY(block.get(1).getY()+1);
-			block.get(3).setX(block.get(3).getX()+1);
-			block.get(3).setY(block.get(3).getY()-1);
+			blocks.get(0).setX(blocks.get(0).getX()-1);
+			blocks.get(0).setY(blocks.get(0).getY()-1);
+			blocks.get(1).setX(blocks.get(1).getX()-1);
+			blocks.get(1).setY(blocks.get(1).getY()+1);
+			blocks.get(3).setX(blocks.get(3).getX()+1);
+			blocks.get(3).setY(blocks.get(3).getY()-1);
 			convertCount++;
 		}
 		else if(convertCount ==2) {
-			block.get(0).setX(block.get(0).getX()-1);
-			block.get(0).setY(block.get(0).getY()+1);
-			block.get(1).setX(block.get(1).getX()+1);
-			block.get(1).setY(block.get(1).getY()+1);
-			block.get(3).setX(block.get(3).getX()-1);
-			block.get(3).setY(block.get(3).getY()-1);
+			blocks.get(0).setX(blocks.get(0).getX()-1);
+			blocks.get(0).setY(blocks.get(0).getY()+1);
+			blocks.get(1).setX(blocks.get(1).getX()+1);
+			blocks.get(1).setY(blocks.get(1).getY()+1);
+			blocks.get(3).setX(blocks.get(3).getX()-1);
+			blocks.get(3).setY(blocks.get(3).getY()-1);
 			convertCount++;
 		}
 		else if(convertCount ==3) {
-			block.get(0).setX(block.get(0).getX()+1);
-			block.get(0).setY(block.get(0).getY()+1);
-			block.get(1).setX(block.get(1).getX()+1);
-			block.get(1).setY(block.get(1).getY()-1);
-			block.get(3).setX(block.get(3).getX()-1);
-			block.get(3).setY(block.get(3).getY()+1);
+			blocks.get(0).setX(blocks.get(0).getX()+1);
+			blocks.get(0).setY(blocks.get(0).getY()+1);
+			blocks.get(1).setX(blocks.get(1).getX()+1);
+			blocks.get(1).setY(blocks.get(1).getY()-1);
+			blocks.get(3).setX(blocks.get(3).getX()-1);
+			blocks.get(3).setY(blocks.get(3).getY()+1);
 			convertCount++;
 		}
 		else if(convertCount ==4) {
-			block.get(0).setX(block.get(0).getX()+1);
-			block.get(0).setY(block.get(0).getY()-1);
-			block.get(1).setX(block.get(1).getX()-1);
-			block.get(1).setY(block.get(1).getY()-1);
-			block.get(3).setX(block.get(3).getX()+1);
-			block.get(3).setY(block.get(3).getY()+1);
+			blocks.get(0).setX(blocks.get(0).getX()+1);
+			blocks.get(0).setY(blocks.get(0).getY()-1);
+			blocks.get(1).setX(blocks.get(1).getX()-1);
+			blocks.get(1).setY(blocks.get(1).getY()-1);
+			blocks.get(3).setX(blocks.get(3).getX()+1);
+			blocks.get(3).setY(blocks.get(3).getY()+1);
 			convertCount=1;
 		}
+
 		
-		
-		return block ;
+		return blocks ;
+	}
 	
-		
+	//회전 실패시 convertCount 되돌림
+	@Override
+	public void reConvert() {
+		if(convertCount == 2 || convertCount == 3 || convertCount ==4   )
+			convertCount--;
+		else
+			convertCount=4;
 	}
 	
 

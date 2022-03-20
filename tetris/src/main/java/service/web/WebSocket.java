@@ -196,6 +196,7 @@ public class WebSocket {
 			HashMap curHash = soloMap.get(sessionList.get(k)).getHash();
 			curHash.put("block", soloMap.get(sessionList.get(k)).getBlockLoc() );
 			curHash.put("score", soloMap.get(sessionList.get(k)).getScore() );
+			curHash.put("numOfUser", sessionList.size() );
 			ObjectMapper mapper = new ObjectMapper();
 			String json = mapper.writeValueAsString(curHash);
 
@@ -221,6 +222,8 @@ public class WebSocket {
 		HashMap curHash = soloMap.get(session).getHash();
 		curHash.put("block", soloMap.get(session).getBlockLoc() );
 		curHash.put("score", soloMap.get(session).getScore() );
+		curHash.put("numOfUser", sessionList.size() );
+		
 		ObjectMapper mapper = new ObjectMapper();
 		try {
 			String json = mapper.writeValueAsString(curHash);

@@ -30,8 +30,8 @@ var webSocket;
 
 function webSocketInit()
 {
-    //webSocket = new WebSocket("ws://localhost:8080/websocket");
-    webSocket = new WebSocket("ws://3.35.55.132:8080/websocket");
+    webSocket = new WebSocket("ws://localhost:8080/websocket");
+    //webSocket = new WebSocket("ws://3.35.55.132:8080/websocket");
 	webSocket.onopen = function(event) { socketOpen(event);};
 	webSocket.onclose = function(event) { socketClose(event);};
 	webSocket.onmessage = function(event) { socketMessage(event);};
@@ -112,7 +112,7 @@ function webSocketInit()
 		//스코어 표시
 		
 		$("#score").text("스코어: "+obj2.score)
-		
+		$("#numOfUser").text("접속자수: "+obj2.numOfUser)
   }
   
   //웹소켓 에러
@@ -199,14 +199,17 @@ function webSocketInit()
 	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
 </head>
 <body>
-	<h1>테트리스 플레이 화면 테스트중</h1>
+	<h1>테트리스 테스트중</h1><h2 id=numOfUser></h2>
 	<button onclick="socketMsgSend('start')">게임시작</button>
 	<button onclick="socketMsgSend('left')">왼쪽이동</button>
 	<button onclick="socketMsgSend('right')">오른쪽이동</button>
 	<button onclick="socketMsgSend('convert')">블록회전</button>
 	<div><h2 id="score" >스코어:</h2></div>
+	
+<h3>
 <table>
 	<tbody id="tetrisBody"></tbody>
 </table>
+</h3>
 </body>
 </html>

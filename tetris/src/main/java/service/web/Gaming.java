@@ -8,18 +8,15 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Random;
 
-import org.springframework.scheduling.annotation.Scheduled;
-import org.springframework.stereotype.Service;
-
 import service.domain.Block;
 import service.domain.Node;
+import service.domain.ReverseNakeBlock;
+import service.domain.SnakeBlock;
 import service.domain.SquareBlock;
+import service.domain.StickBlock;
 import service.domain.UBlock;
 
-
-
 public class Gaming {
-	
 	
 	Random random = new Random() ;
 	
@@ -31,7 +28,6 @@ public class Gaming {
 	//게임판으로 사용됨
 	private  HashMap<Integer, Boolean> hash = new HashMap<Integer, Boolean>();
 	
-
 	
 	//row 수
 	private final int rows = 10;
@@ -91,8 +87,8 @@ public class Gaming {
 	
 	private boolean makeBlock() {
 		
-		int rand =random.nextInt(2);
-		
+		//int rand =random.nextInt(3);
+		int rand =4;
 
 		try {
 		if(rand ==0) {
@@ -103,7 +99,18 @@ public class Gaming {
 			laningBlock  = new SquareBlock(columns);
 			laningBlock.createBlock();
 		}
-		
+		else if(rand ==2) {
+			laningBlock  = new StickBlock(columns);
+			laningBlock.createBlock();
+		}
+		else if(rand ==3) {
+			laningBlock  = new SnakeBlock(columns);
+			laningBlock.createBlock();
+		}
+		else if(rand ==4) {
+			laningBlock = new ReverseNakeBlock(columns);
+			laningBlock.createBlock();
+		}
 			return true ;
 		}
 		catch (Exception e) {
@@ -257,30 +264,43 @@ public class Gaming {
 
 	//블록 left 이동 이벤트
 	public void leftMove() {
-		for(Node n : laningBlock.leftMoveBlock()) {
+		//prior 메서드를 호출해서 변환해도 되는지 먼저 체크
+		boolean possibleCheck = true;
+		
+		for(Node n : laningBlock.priorLeftMoveBlock()) {
 			if(n.getY() >columns-1 || n.getY() <0 || n.getY() >rows*columns-1  || hash.get((n.getX())*columns+n.getY()) ) {
-				laningBlock.backupBlock();
-				
+				possibleCheck =false;
 				break;
 			}
 		}
+		//회전해도 되는 경우
+		if(possibleCheck) 
+			laningBlock.leftMoveBlock();
+		
 	}
 	
 	//블록 right 이동 이벤트
 	public void rightMove() {
-		for(Node n : laningBlock.rightMoveBlock()) {
+		//prior 메서드를 호출해서 변환해도 되는지 먼저 체크
+		boolean possibleCheck = true;
+		
+		for(Node n : laningBlock.priorRightMoveBlock()) {
 			if(n.getY() >columns-1 || n.getY() <0 || n.getY() >rows*columns-1  || hash.get((n.getX())*columns+n.getY()) ) {
-				laningBlock.backupBlock();
-				
+				possibleCheck =false;
 				break;
 			}
 		}
-				
+		//회전해도 되는 경우
+		if(possibleCheck) 
+			laningBlock.rightMoveBlock();			
 	}
 	
 	//블록 회전 이벤트
 	public void convertBlock() {
+		//블록이 내려가기전 회전이벤트를 발생했나 체크
 		boolean firstLine = false;
+		//prior 메서드를 호출해서 변환해도 되는지 먼저 체크
+		boolean possibleCheck = true;
 		for(Node n : laningBlock.getBlock() ) {
 			if(n.getX()==0) {
 				firstLine = true;
@@ -292,22 +312,32 @@ public class Gaming {
 			// 아직 첫줄일때는 하강하지 않는다.
 		}
 		else {
-		for(Node n : laningBlock.convertBlock()) {
+		for(Node n : laningBlock.priorConvertBlock()) {
 			
 			if((n.getX())*columns+n.getY()> rows*columns-1 ) {
-				laningBlock.backupBlock();
+				//laningBlock.backupBlock();
+				laningBlock.reConvert();
+				possibleCheck =false;
 				break;
 			}
-			else if(n.getX() <0 || n.getX() >rows*columns-1 || n.getY() >columns-1 || n.getY() <0 || n.getY() >rows*columns-1  || hash.get((n.getX())*columns+n.getY()) ) {
-				
-	
-				
-				laningBlock.backupBlock();
-				
+			else if(n.getX() <0 || n.getX()*columns+n.getY() <-1  || n.getY() >columns-1 || n.getY() <0 ) {
+				//laningBlock.backupBlock();
+				laningBlock.reConvert();
+				possibleCheck =false;
 				break;
 			}
-			
+			else if(hash.get((n.getX())*columns+n.getY())) {
+				laningBlock.reConvert();
+				possibleCheck =false;
+				break;
+			}
+
 		}
+		
+		//회전해도 되는 경우
+		if(possibleCheck) 
+			laningBlock.convertBlock();
+
 		}
 	}
 	

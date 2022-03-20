@@ -19,5 +19,13 @@ public interface Block {
 	
 	List<Node> rightMoveBlock();
 	
+	List<Node> priorLeftMoveBlock();
+	
+	List<Node> priorRightMoveBlock();
+	
+	List<Node> priorConvertBlock();
+	
+	 void reConvert() ;
+	//버전 수정하면서 안씀
 	 void backupBlock() ;
 }
