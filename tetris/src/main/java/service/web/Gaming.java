@@ -87,8 +87,8 @@ public class Gaming {
 	
 	private boolean makeBlock() {
 		
-		//int rand =random.nextInt(3);
-		int rand =4;
+		int rand =random.nextInt(5);
+		
 
 		try {
 		if(rand ==0) {

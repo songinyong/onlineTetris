@@ -49,21 +49,23 @@ public class StickBlock extends ParentBlock implements Block{
 			convertCount+=1;
 		
 		if(convertCount ==1) {
+			blocks.get(0).setY(blocks.get(0).getY()+4);
 			blocks.get(1).setX(blocks.get(1).getX()+1);
-			blocks.get(1).setY(blocks.get(1).getY()-1);
+			blocks.get(1).setY(blocks.get(1).getY()+3);
 			blocks.get(2).setX(blocks.get(2).getX()+2);
-			blocks.get(2).setY(blocks.get(2).getY()-2);
+			blocks.get(2).setY(blocks.get(2).getY()+2);
 			blocks.get(3).setX(blocks.get(3).getX()+3);
-			blocks.get(3).setY(blocks.get(3).getY()-3);
+			blocks.get(3).setY(blocks.get(3).getY()+1);
 			convertCount++;
 		}
 		else if(convertCount ==2) {
+			blocks.get(0).setY(blocks.get(0).getY()-4);
 			blocks.get(1).setX(blocks.get(1).getX()-1);
-			blocks.get(1).setY(blocks.get(1).getY()+1);
+			blocks.get(1).setY(blocks.get(1).getY()-3);
 			blocks.get(2).setX(blocks.get(2).getX()-2);
-			blocks.get(2).setY(blocks.get(2).getY()+2);
+			blocks.get(2).setY(blocks.get(2).getY()-2);
 			blocks.get(3).setX(blocks.get(3).getX()-3);
-			blocks.get(3).setY(blocks.get(3).getY()+3);
+			blocks.get(3).setY(blocks.get(3).getY()-1);
 			convertCount=1;
 		}
 
