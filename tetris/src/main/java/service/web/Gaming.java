@@ -21,6 +21,7 @@ public class Gaming {
 	Random random = new Random() ;
 	
 	private Block laningBlock ;
+	private Block nextBlock ;
 	
 	//블럭이 생성되었나 체크함 (블럭 생성 안되어있을떄는 블록 움직이는 이벤트 반응안함)
 	private boolean makedBlock = false;
@@ -45,6 +46,7 @@ public class Gaming {
 	public Block getBlockInfo() {
 		return laningBlock; 
 	}
+	
 	
 	public HashMap<Integer, Boolean> getHash() {
 		return hash;
@@ -90,6 +92,7 @@ public class Gaming {
 		int rand =random.nextInt(5);
 		
 
+
 		try {
 		if(rand ==0) {
 			laningBlock = new UBlock(columns) ;
@@ -111,6 +114,50 @@ public class Gaming {
 			laningBlock = new ReverseNakeBlock(columns);
 			laningBlock.createBlock();
 		}
+		nextBlock =  new UBlock(columns) ;
+		nextBlock.createBlock();
+			return true ;
+		}
+		catch (Exception e) {
+			return false;
+		}
+		
+		
+		
+	}
+	
+	private boolean makeBlock(Block block) {
+		
+		
+		laningBlock = block;
+			
+		
+		
+		int rand =random.nextInt(5);
+		
+
+
+		try {
+		if(rand ==0) {
+			nextBlock = new UBlock(columns) ;
+			nextBlock.createBlock();
+		}
+		else if(rand ==1) {
+			nextBlock  = new SquareBlock(columns);
+			nextBlock.createBlock();
+		}
+		else if(rand ==2) {
+			nextBlock  = new StickBlock(columns);
+			nextBlock.createBlock();
+		}
+		else if(rand ==3) {
+			nextBlock  = new SnakeBlock(columns);
+			nextBlock.createBlock();
+		}
+		else if(rand ==4) {
+			nextBlock = new ReverseNakeBlock(columns);
+			nextBlock.createBlock();
+		}
 			return true ;
 		}
 		catch (Exception e) {
@@ -118,6 +165,7 @@ public class Gaming {
 		}
 		
 	}
+	
 	
 	//블록 보드판에 착륙되었는지 확인 착륙시 true , 내려가는중이면 false
 	private boolean checkBoard(Block block) {
@@ -248,7 +296,7 @@ public class Gaming {
 			if(endCheck()) return false;
 			else {
 				//게임이 안끝났다면 신규 블록을 생성한다.
-				makeBlock();
+				makeBlock(nextBlock);
 				makedBlock = true;
 				return true;
 			}
@@ -352,9 +400,22 @@ public class Gaming {
 		return curLoc;
 	}
 	
+	//다음 블록 모양 알려줌
+	public HashMap getNextBlock() {
+		HashMap nextLoc = new HashMap();
+		int count =0;
+		for (Node n :nextBlock.getBlock()) {
+			nextLoc.put(count, n.getX()*columns + n.getY());
+			count++;
+		}
+		return nextLoc;
+	}
+	
 	//셰션 종료등으로 게임 강제 종료
 	public void endGame() {
 		startCheck =false ;
 	}
+	
+	
 	
 }
