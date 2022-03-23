@@ -2,6 +2,7 @@ package service.web;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
@@ -30,15 +31,21 @@ public class WebSocket {
      */
     private static ArrayList<Session> sessionList = new ArrayList<Session>();
     
+    private static ArrayList<Integer> roomList = new ArrayList<Integer>();
     /**
      * 서버에 접속한 웹소캣별 게이밍 진행상태 저장
      */
     
-    //�썑�뿉 諛⑷쾶�엫 �솗�옣�꽦�쓣 �쐞�빐 �뀒�뒪�듃�슜�쑝濡� �궓源�
-    private static ArrayList<HashMap<Session, Gaming>> gamgingList = new ArrayList<HashMap<Session, Gaming>>();
+    //멀티모드 방 테스트
+    //private static ArrayList<HashMap<Session, Gaming>> gamgingList = new ArrayList<HashMap<Session, Gaming>>();
     
+    //세션이 들어간 방 정보
+    private static HashMap<Session, Integer> userRoomInfo = new HashMap<Session, Integer>();
+    
+    //방 리스트
+    private static HashMap<Integer, Gaming> roomInfo = new HashMap<Integer, Gaming>();
     //현재 진행중인 솔로모드용 게이밍 리스트
-    private static HashMap<Session, Gaming> soloMap = new HashMap<Session, Gaming>();
+    //private static HashMap<Session, Gaming> soloMap = new HashMap<Session, Gaming>();
     /**
      * 웹소켓 사용자 연결 성립하는 경우 호출
      */
@@ -47,8 +54,14 @@ public class WebSocket {
         if (session != null) {
             String sessionId = session.getId();
 
+            
             sessionList.add(session);
-            soloMap.put(session, new Gaming() );
+            roomList.add(0);
+            userRoomInfo.put(session, 0 );
+            
+            if(roomInfo.isEmpty()) {
+            	roomInfo.put(0, new Gaming());
+            }
          
            /* HashMap<Session, Gaming> map = new HashMap<Session, Gaming>();
               map.put(session, new Gaming());
@@ -81,31 +94,31 @@ public class WebSocket {
             
             if(message.equals("start")) {
             	//처음 시작할때
-            	if(!soloMap.get(session).getStartCheck())
+            	if(!roomInfo.get(userRoomInfo.get(session)).getStartCheck())
             		
-            		soloMap.get(session).gameStart();
+            		roomInfo.get(userRoomInfo.get(session)).gameStart();
             	else {
             		
             		//재시작할때
-            		soloMap.put(session, new Gaming() );
-            		soloMap.get(session).gameStart();
+            		roomInfo.put(userRoomInfo.get(session), new Gaming() );
+            		roomInfo.get(userRoomInfo.get(session)).gameStart();
             	}
             }
-            else if(message.equals("left") && soloMap.get(session).getMakedBlock() ) {
-	            if(soloMap.get(session).getStartCheck()) {
-	            	soloMap.get(session).leftMove();
+            else if(message.equals("left") && roomInfo.get(userRoomInfo.get(session)).getMakedBlock() ) {
+	            if(roomInfo.get(userRoomInfo.get(session)).getStartCheck()) {
+	            	roomInfo.get(userRoomInfo.get(session)).leftMove();
 	            	session.getAsyncRemote().sendText(makeJson(session));
 	            }
             }
-            else if(message.equals("right") && soloMap.get(session).getMakedBlock() ) {
-            	if(soloMap.get(session).getStartCheck()) {
-            		soloMap.get(session).rightMove();
+            else if(message.equals("right") && roomInfo.get(userRoomInfo.get(session)).getMakedBlock() ) {
+            	if(roomInfo.get(userRoomInfo.get(session)).getStartCheck()) {
+            		roomInfo.get(userRoomInfo.get(session)).rightMove();
             		session.getAsyncRemote().sendText(makeJson(session));
             	}
             }
-            else if(message.equals("convert") && soloMap.get(session).getMakedBlock() ) {
-            	if(soloMap.get(session).getStartCheck())  {        	
-            		soloMap.get(session).convertBlock();
+            else if(message.equals("convert") && roomInfo.get(userRoomInfo.get(session)).getMakedBlock() ) {
+            	if(roomInfo.get(userRoomInfo.get(session)).getStartCheck())  {        	
+            		roomInfo.get(userRoomInfo.get(session)).convertBlock();
             		session.getAsyncRemote().sendText(makeJson(session));
             	}
             }
@@ -129,7 +142,7 @@ public class WebSocket {
             //System.out.println("client is disconnected. sessionId == [" + sessionId + "]");
             
             //사람이 나가면 진행중인 게임 종료후 세션 리스트에서 제거
-            soloMap.get(session).endGame();
+            //roomInfo.get(0).endGame();
             sessionList.remove(session);
 
         }
@@ -183,22 +196,22 @@ public class WebSocket {
 	private void gameCheck() throws JsonProcessingException{
 		
 		for(int k=0; k<sessionList.size(); k++) {
-
+			Integer romInfo = userRoomInfo.get(sessionList.get(k));
 			try {
-			if(soloMap.get(sessionList.get(k)).getStartCheck()) {
+			if(roomInfo.get(romInfo).getStartCheck()) {
 		//게임 엔드일경우
-		if(!soloMap.get(sessionList.get(k)).gaming()) {
+		if(!roomInfo.get(romInfo).gaming()) {
 			
 			//게임 엔드일 경우 패스
 		}
 		else {
 			//현재 진행중인 게임판 데이터 전달
-			HashMap curHash = soloMap.get(sessionList.get(k)).getHash();
-			curHash.put("block", soloMap.get(sessionList.get(k)).getBlockLoc() );
-			curHash.put("score", soloMap.get(sessionList.get(k)).getScore() );
+			HashMap curHash = roomInfo.get(romInfo).getHash();
+			curHash.put("block", roomInfo.get(romInfo).getBlockLoc() );
+			curHash.put("score", roomInfo.get(romInfo).getScore() );
 			curHash.put("numOfUser", sessionList.size() );
 			curHash.put("userId", sessionList.get(k).getId() );
-			curHash.put("nextBlock", soloMap.get(sessionList.get(k)).getNextBlock() );
+			curHash.put("nextBlock", roomInfo.get(romInfo).getNextBlock() );
 			ObjectMapper mapper = new ObjectMapper();
 			String json = mapper.writeValueAsString(curHash);
 
@@ -221,12 +234,12 @@ public class WebSocket {
 	
 	//현재 게임 상태 객체로 만들어서 반환
 	public String makeJson(Session session) {
-		HashMap curHash = soloMap.get(session).getHash();
-		curHash.put("block", soloMap.get(session).getBlockLoc() );
-		curHash.put("score", soloMap.get(session).getScore() );
+		HashMap curHash = roomInfo.get(0).getHash();
+		curHash.put("block", roomInfo.get(0).getBlockLoc() );
+		curHash.put("score", roomInfo.get(0).getScore() );
 		curHash.put("numOfUser", sessionList.size() );
 		curHash.put("userId", session.getId() );
-		curHash.put("nextBlock", soloMap.get(session).getNextBlock() );
+		curHash.put("nextBlock", roomInfo.get(0).getNextBlock() );
 		
 		ObjectMapper mapper = new ObjectMapper();
 		try {
