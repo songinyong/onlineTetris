@@ -1,5 +1,9 @@
 package service.domain;
-
+/*     블록 모양
+ * 	    **
+ * 	    **
+ * 
+ * */
 
 
 public class SquareBlock extends ParentBlock implements Block {

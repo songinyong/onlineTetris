@@ -1,5 +1,9 @@
 package service.domain;
-
+/*     블록 모양
+ * 		**
+ * 	     **
+ * 
+ * */
 import java.util.List;
 
 public class ReverseNakeBlock extends ParentBlock implements Block {

@@ -2,9 +2,6 @@ package service.web;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
 
 import javax.websocket.OnClose;
 import javax.websocket.OnError;
@@ -19,7 +16,7 @@ import org.springframework.stereotype.Component;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-import service.domain.Node;
+import service.domain.Room;
 
 @Component
 @ServerEndpoint("/websocket")
@@ -31,7 +28,7 @@ public class WebSocket {
      */
     private static ArrayList<Session> sessionList = new ArrayList<Session>();
     
-    private static ArrayList<Integer> roomList = new ArrayList<Integer>();
+    private static ArrayList<Room> roomList = new ArrayList<Room>();
     /**
      * 서버에 접속한 웹소캣별 게이밍 진행상태 저장
      */
@@ -42,10 +39,13 @@ public class WebSocket {
     //세션이 들어간 방 정보
     private static HashMap<Session, Integer> userRoomInfo = new HashMap<Session, Integer>();
     
-    //방 리스트
-    private static HashMap<Integer, Gaming> roomInfo = new HashMap<Integer, Gaming>();
+
     //현재 진행중인 솔로모드용 게이밍 리스트
     //private static HashMap<Session, Gaming> soloMap = new HashMap<Session, Gaming>();
+    
+    
+    
+
     /**
      * 웹소켓 사용자 연결 성립하는 경우 호출
      */
@@ -56,27 +56,26 @@ public class WebSocket {
 
             
             sessionList.add(session);
-            roomList.add(0);
-            userRoomInfo.put(session, 0 );
+            //빈방 있는지 검색후 방이 있을시 그 방에 들어감
+            for(Room r : roomList) {
+            	if(r.userAllJoin()) ;
+            	else {
+            		r.userJoin(session);
+            		userRoomInfo.put(session, r.getRoomId());
+            	}
+            	
+            }
             
-            if(roomInfo.isEmpty()) {
-            	roomInfo.put(0, new Gaming());
-            }
-         
-           /* HashMap<Session, Gaming> map = new HashMap<Session, Gaming>();
-              map.put(session, new Gaming());
-              gamgingList.add(map);
-                
-            for(int i = 0; i < gamgingList.size(); i++){
-                //arraylist �궗�씠利� 留뚰겮 for臾몄쓣 �떎�뻾�빀�땲�떎.
-                System.out.println("list �닚�꽌 " + i + "踰덉��");
-                for( Entry<Session, Gaming> elem : gamgingList.get(i).entrySet() ){
-                    // list 媛곴컖 hashmap諛쏆븘�꽌 異쒕젰�빀�땲�떎.
-                    System.out.println( String.format("�궎 : %s, 媛� : %s", elem.getKey(), elem.getValue().getStartCheck()) );
-                }
-            }
-            */
-
+            //방이 없을시 새로운 방을 만듬
+            roomList.add(new Room());
+            int roomId = roomList.size()-1;
+            //방에 아이디 부여
+            roomList.get(roomId).setRoomId(roomId);
+            //방에 들어감
+            roomList.get(roomId).userJoin(session);
+            //user가 들어간 방 정보 등록
+            userRoomInfo.put(session, roomId);
+            
         }
        
     }
@@ -91,34 +90,39 @@ public class WebSocket {
             String sessionId = session.getId();
            // System.out.println("message is arrived. sessionId == [" + sessionId + "] / message == [" + message + "]");
             //System.out.println("message is arrived. sessionId == [" + session + "] / message == [" + message + "]");
+            Integer romid = userRoomInfo.get(session);
             
             if(message.equals("start")) {
-            	//처음 시작할때
-            	if(!roomInfo.get(userRoomInfo.get(session)).getStartCheck())
+            	roomList.get(romid).userclickStart(session);
+            	
+            	//시작 안했으면 시작
+            	if(!roomList.get(romid).getGaming().getStartCheck() && roomList.get(romid).userAllReStart())
             		
-            		roomInfo.get(userRoomInfo.get(session)).gameStart();
+            		roomList.get(romid).getGaming().gameStart();
             	else {
             		
             		//재시작할때
-            		roomInfo.put(userRoomInfo.get(session), new Gaming() );
-            		roomInfo.get(userRoomInfo.get(session)).gameStart();
+            		if(roomList.get(romid).userAllReStart()) {
+            			roomList.get(romid).setGaming(new Gaming());
+            			roomList.get(romid).getGaming().gameStart();
+            		}
             	}
             }
-            else if(message.equals("left") && roomInfo.get(userRoomInfo.get(session)).getMakedBlock() ) {
-	            if(roomInfo.get(userRoomInfo.get(session)).getStartCheck()) {
-	            	roomInfo.get(userRoomInfo.get(session)).leftMove();
+            else if(message.equals("left") && roomList.get(romid).getGaming().getMakedBlock() ) {
+	            if(roomList.get(romid).getGaming().getStartCheck()) {
+	            	roomList.get(romid).getGaming().leftMove();
 	            	session.getAsyncRemote().sendText(makeJson(session));
 	            }
             }
-            else if(message.equals("right") && roomInfo.get(userRoomInfo.get(session)).getMakedBlock() ) {
-            	if(roomInfo.get(userRoomInfo.get(session)).getStartCheck()) {
-            		roomInfo.get(userRoomInfo.get(session)).rightMove();
+            else if(message.equals("right") && roomList.get(romid).getGaming().getMakedBlock() ) {
+            	if(roomList.get(romid).getGaming().getStartCheck()) {
+            		roomList.get(romid).getGaming().rightMove();
             		session.getAsyncRemote().sendText(makeJson(session));
             	}
             }
-            else if(message.equals("convert") && roomInfo.get(userRoomInfo.get(session)).getMakedBlock() ) {
-            	if(roomInfo.get(userRoomInfo.get(session)).getStartCheck())  {        	
-            		roomInfo.get(userRoomInfo.get(session)).convertBlock();
+            else if(message.equals("convert") && roomList.get(romid).getGaming().getMakedBlock() ) {
+            	if(roomList.get(romid).getGaming().getStartCheck())  {        	
+            		roomList.get(romid).getGaming().convertBlock();
             		session.getAsyncRemote().sendText(makeJson(session));
             	}
             }
@@ -142,9 +146,11 @@ public class WebSocket {
             String sessionId = session.getId();
             //System.out.println("client is disconnected. sessionId == [" + sessionId + "]");
             
-            //사람이 나가면 진행중인 게임 종료후 세션 리스트에서 제거
-            //roomInfo.get(0).endGame();
+            //세션리스트에서 제거
             sessionList.remove(session);
+            int roomId = userRoomInfo.get(session);
+            //방에서 제거
+            roomList.get(roomId).userOut(session);
 
         }
     }
@@ -197,33 +203,32 @@ public class WebSocket {
 	private void gameCheck() throws JsonProcessingException{
 		
 		for(int k=0; k<sessionList.size(); k++) {
-			Integer romInfo = userRoomInfo.get(sessionList.get(k));
+			Integer romid = userRoomInfo.get(sessionList.get(k));
 			try {
-			if(roomInfo.get(romInfo).getStartCheck()) {
-		//게임 엔드일경우
-		if(!roomInfo.get(romInfo).gaming()) {
-			
-			//게임 엔드일 경우 패스
-		}
-		else {
-			//현재 진행중인 게임판 데이터 전달
-			HashMap curHash = roomInfo.get(romInfo).getHash();
-			curHash.put("block", roomInfo.get(romInfo).getBlockLoc() );
-			curHash.put("score", roomInfo.get(romInfo).getScore() );
-			curHash.put("numOfUser", sessionList.size() );
-			curHash.put("userId", sessionList.get(k).getId() );
-			curHash.put("nextBlock", roomInfo.get(romInfo).getNextBlock() );
-			ObjectMapper mapper = new ObjectMapper();
-			String json = mapper.writeValueAsString(curHash);
-
-			sessionList.get(k).getAsyncRemote().sendText(json);
-
-		}
+				
+				//게임을 시작한 객체일시 gaming 연산(블럭 다운, 줄 체크 등) 시작
+			if(roomList.get(romid).getGaming().getStartCheck()) {
+				//게임 엔드일경우
+				
+				//처음으로 게이밍 체크하는 경우
+				if(!roomList.get(romid).isGamingCheck()) {
+					//게이밍 연산 실행
+					roomList.get(romid).getGaming().gaming();
+					//게이밍 정보 전달
+					sessionList.get(k).getAsyncRemote().sendText(makeJson(sessionList.get(k)));
+					
+					roomList.get(romid).setGamingCheck(true);
+					
+				}
+				else {
+					//현재 진행중인 게임판 데이터 전달
+					sessionList.get(k).getAsyncRemote().sendText(makeJson(sessionList.get(k)));
+					roomList.get(romid).setGamingCheck(false);
+				}
 	
 		} else {
-			
-		//게임 시작 안한 객체는 바로 패스
-		}
+			//게임 시작 안한 객체는 바로 패스
+		  }
 			} //중간에 로그아웃으로 nullPoint exception이 발생할 수 있음
 			catch (NullPointerException e) {
 				
@@ -231,16 +236,23 @@ public class WebSocket {
 			
 		}
 		
+		//추가해야할것
+		// 게임 스탯 정보 ready,gaming 두개로 구분 
+		
+		
 	}
 	
 	//현재 게임 상태 객체로 만들어서 반환
 	public String makeJson(Session session) {
-		HashMap curHash = roomInfo.get(0).getHash();
-		curHash.put("block", roomInfo.get(0).getBlockLoc() );
-		curHash.put("score", roomInfo.get(0).getScore() );
+		
+		Integer romid = userRoomInfo.get(session);
+		
+		HashMap curHash = roomList.get(romid).getGaming().getHash();
+		curHash.put("block", roomList.get(romid).getGaming().getBlockLoc() );
+		curHash.put("score", roomList.get(romid).getGaming().getScore() );
 		curHash.put("numOfUser", sessionList.size() );
 		curHash.put("userId", session.getId() );
-		curHash.put("nextBlock", roomInfo.get(0).getNextBlock() );
+		curHash.put("nextBlock", roomList.get(romid).getGaming().getNextBlock() );
 		
 		ObjectMapper mapper = new ObjectMapper();
 		try {

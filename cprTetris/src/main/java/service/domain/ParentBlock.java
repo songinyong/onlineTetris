@@ -1,4 +1,15 @@
 package service.domain;
+/*
+ * 모든 블럭의 공통 조상이다
+ * down, left, right move는 공통으로 사용되고
+ * 도형 회전(convert)는 각블록마다 Override해서 만들어 사용한다.
+ * 
+ * 안정성을 위해 설계가 수정되어 Backup은 현재 사용되지 않도록 수정되었다.
+ * 
+ * */
+
+
+
 
 import java.util.ArrayList;
 import java.util.List;

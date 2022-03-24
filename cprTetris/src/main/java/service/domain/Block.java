@@ -1,4 +1,7 @@
-/*Block임*/
+/*Block이다.
+ * 
+ * 
+ * */
 
 package service.domain;
 
