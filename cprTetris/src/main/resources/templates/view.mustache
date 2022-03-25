@@ -60,8 +60,8 @@ var webSocket;
 
 function webSocketInit()
 {
-    //webSocket = new WebSocket("ws://localhost:8081/websocket");
-    webSocket = new WebSocket("ws://3.35.55.132:8081/websocket");
+    webSocket = new WebSocket("ws://localhost:8081/websocket");
+    //webSocket = new WebSocket("ws://3.35.55.132:8081/websocket");
 	webSocket.onopen = function(event) { socketOpen(event);};
 	webSocket.onclose = function(event) { socketClose(event);};
 	webSocket.onmessage = function(event) { socketMessage(event);};
@@ -104,14 +104,30 @@ function webSocketInit()
   
   //웹소켓 메시지 수신
   function socketMessage(event){
-  	 //var msg = JSON.parse(event.data);
-     //           console.log("server", JSON.stringify(msg.content));
-  	  var receiveData = event.data; // 수신 data
-  	  //var json = JSON.stringify(receiveData);
-  	  var obj2 = JSON.parse(receiveData);
-      
 
-		// 게임판
+  	  var receiveData = event.data; // 수신 data
+  	  var obj2 = JSON.parse(receiveData);
+  	  console.log(obj2)
+  	  if(obj2.status =="gaming") {
+      	updateGaming(obj2)
+	  }
+	  else if(obj2.status =="userStatus") {
+	  
+	  
+	  }
+
+  }
+  
+  //user 상태 정보 전달 메시지 받을때
+  function updateUserInfo() {
+  
+  
+  }
+  
+  
+  //게임 진행중 상태 받을때
+  function updateGaming(obj2) {
+  		// 게임판
       $("#tetrisBody").empty();
       	var htmlstr = "";
 		for(var i=0; i<rows; i++) {
@@ -168,7 +184,11 @@ function webSocketInit()
 		$("#numOfUser").text("접속자수: "+obj2.numOfUser)
 		$("label[for='userId']").text("유저 아이디: "+ obj2.userId)
 		$("#nextLabel").text("다음블럭")
+  
+  
+  
   }
+  
   
   //웹소켓 에러
   function socketError(event){

@@ -40,8 +40,11 @@ public class Room {
 	private Gaming gaming ;
 	
 	
-	//웹 객체가 처리했나 확인 (하나의 유저를 통해 게이밍 객체를 확인했으면 다른 유저 차례에서는 gaming 연산 안하고 패스)
+	//웹 객체가 게이밍 객체 연산을 처리했나 확인 (첫번째 유저를 통해 게이밍 연산을 진행했다면 true로 변경됨, 다른 유저 차례에서는 gaming 연산 안하고 패스후 false로 바뀜)
 	private boolean gamingCheck= false;
+	
+	//방 객체가 게임중인지 확인
+	private boolean progress ;
 	
 
 	//start 클릭할때
@@ -56,6 +59,7 @@ public class Room {
 	//방 인원이 전부 들어왔는지 확인
 	public boolean userAllJoin() {
 		for(int i =0; i<2; i++) {
+			
 			if(userList[i] == null) 
 				return false;	
 		}	
@@ -71,8 +75,10 @@ public class Room {
 		for(int i =0; i<2; i++) {
 			if(userList[i] == null) {
 				userList[i] = user ;
+
 				break;
 			}
+			
 		}	
 		
 		return true;
@@ -90,7 +96,27 @@ public class Room {
 				break;
 			}
 		}	
+	}
+	
+	//방의 다른 유저 정보 있는지 확인
+	public boolean anotherUserCheck(Session user ) {
+		for(int i=0; i<2; i++) {
+			if(userList[i] != user && userList[i] != null) 
+				return true ;
+		}
+		
+		return false ;
 	}	
+	
+	//방의 다른 유저 정보 전달
+	public Session anotherUser(Session user ) {
+		for(int i=0; i<2; i++) {
+			if(!userList[i].equals(user) && userList[i] != null) 
+				return userList[i];
+		}
+		
+		return null ;
+	}
 	
 	/*user가 들어올때 (순서 지정) 리스트에서 사용될듯함
 	public void userJoin(int order, Session user) {
