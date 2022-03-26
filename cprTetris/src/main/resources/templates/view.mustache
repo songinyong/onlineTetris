@@ -52,7 +52,10 @@
 		$("#nextBody").html(htmlstr)
 		
 		
-		window.addEventListener("keydown", (e) => console.log(e));
+		//window.addEventListener("keydown", (e) => console.log(e));
+		
+		
+		
 		
 	});
 //웹소켓 생성
@@ -60,8 +63,8 @@ var webSocket;
 
 function webSocketInit()
 {
-    //webSocket = new WebSocket("ws://localhost:8081/websocket");
-    webSocket = new WebSocket("ws://3.35.55.132:8081/websocket");
+    webSocket = new WebSocket("ws://localhost:8081/websocket");
+    //webSocket = new WebSocket("ws://3.35.55.132:8081/websocket");
 	webSocket.onopen = function(event) { socketOpen(event);};
 	webSocket.onclose = function(event) { socketClose(event);};
 	webSocket.onmessage = function(event) { socketMessage(event);};
@@ -109,6 +112,18 @@ function webSocketInit()
   	  var obj2 = JSON.parse(receiveData);
   	  if(obj2.status =="gaming") {
       	updateGaming(obj2)
+      	if(obj2.mesg == "left") {
+      		$("#anoUserchat").append("상대방이 왼쪽이동\r\n");
+      		$("#anoUserchat").scrollTop($("#anoUserchat").prop('scrollHeight'));
+      		}
+      	else if(obj2.mesg == "right") {
+      		$("#anoUserchat").append("상대방이 오른쪽이동\r\n");
+      		$("#anoUserchat").scrollTop($("#anoUserchat").prop('scrollHeight'));
+      		}
+      	else if(obj2.mesg == "convert") {
+      		$("#anoUserchat").append("상대방이 회전함\r\n");
+      		$("#anoUserchat").scrollTop($("#anoUserchat").prop('scrollHeight'));
+      		}
 	  }
 	  else if(obj2.status =="userStatus") {
 	  updateUserInfo(obj2)
@@ -271,11 +286,11 @@ function webSocketInit()
 <html>
 <head>
 
-	<title>테트리스</title>
+	<title>협력블록쌓기</title>
 	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
 </head>
 <body>
-	<h1>테트리스 테스트중</h1><h2 id=numOfUser></h2><label for="roomId"></label><br/>
+	<h1>협력모드 테스트중</h1><h2 id=numOfUser></h2><label for="roomId"></label><br/>
 	<label for="userId"></label><br/>
 	<label for="anoUserId"></label><br/>
 	<label for="mesg">메시지:</label><br/>
@@ -285,7 +300,9 @@ function webSocketInit()
 	<button onclick="socketMsgSend('convert')">블록회전</button>
 	<div><h2 id="score" >스코어:</h2></div>
 	<h2 id="nextLabel"><h2>
-	
+	<h2 id="anoUserLabel">상대방메시지<h2>
+	<textarea id="anoUserchat" name="anoUserchat" rows="5"></textarea>
+          
 <h3>
 <table>
 	<tbody id="tetrisBody"></tbody>

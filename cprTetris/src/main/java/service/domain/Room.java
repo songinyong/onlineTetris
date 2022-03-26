@@ -64,7 +64,8 @@ public class Room {
 				return false;	
 		}	
 		return true;
-	}		
+	}
+	
 	
 	//user 들어올때
 	public boolean userJoin(Session user) {

@@ -32,6 +32,7 @@ public class WebSocket {
     /**
      * 서버에 접속한 웹소캣별 게이밍 진행상태 저장
      */
+    private static int nextRoomId = 0;
     
     //멀티모드 방 테스트
     //private static ArrayList<HashMap<Session, Gaming>> gamgingList = new ArrayList<HashMap<Session, Gaming>>();
@@ -72,13 +73,15 @@ public class WebSocket {
             if(makeRoomCheck) {
             //방이 없을시 새로운 방을 만듬
             roomList.add(new Room());
-            int roomId = roomList.size()-1;
+            int roomId = nextRoomId;
+            nextRoomId++;
             //방에 아이디 부여
             roomList.get(roomId).setRoomId(roomId);
             //방에 들어감
             roomList.get(roomId).userJoin(session);
             //user가 들어간 방 정보 등록
             userRoomInfo.put(session, roomId);
+            sendMessage(session, makeJson(sendUserInfo(session, "접속성공")));
             }
               
             
@@ -112,6 +115,11 @@ public class WebSocket {
 	            	roomList.get(romid).setGaming(new Gaming());
 	            	roomList.get(romid).getGaming().gameStart();
 	            	roomList.get(romid).setGamingCheck(false);
+	            	
+	            	sendMessage(session, makeJson(sendUserInfo(session, "")));
+	               	if(roomList.get(romid).anotherUserCheck(session))
+	            		sendMessage(roomList.get(romid).anotherUser(session), makeJson(sendUserInfo(roomList.get(romid).anotherUser(session), "")));	            	
+	            	
 	            }
 	            		
 	            		
@@ -120,6 +128,10 @@ public class WebSocket {
 	            if(roomList.get(romid).getGaming().getStartCheck()) {
 	            	roomList.get(romid).getGaming().leftMove();
 	            	sendMessage(session, makeJson(comParaMeter(session)));
+	            	if(roomList.get(romid).anotherUserCheck(session)) {
+	            		Session anoSession = roomList.get(romid).anotherUser(session);
+	            		sendMessage(anoSession, makeJson(comParaMeter(anoSession, "gaming", "left")));
+	            	}
 	            	
 	            }
             }
@@ -127,12 +139,22 @@ public class WebSocket {
             	if(roomList.get(romid).getGaming().getStartCheck()) {
             		roomList.get(romid).getGaming().rightMove();
             		sendMessage(session, makeJson(comParaMeter(session)));
+	            	if(roomList.get(romid).anotherUserCheck(session)) {
+	            		Session anoSession = roomList.get(romid).anotherUser(session);
+	            		sendMessage(anoSession, makeJson(comParaMeter(anoSession, "gaming", "right")));
+	            	}
+            		
             	}
             }
             else if(message.equals("convert") && roomList.get(romid).getGaming().getMakedBlock() ) {
             	if(roomList.get(romid).getGaming().getStartCheck())  {        	
             		roomList.get(romid).getGaming().convertBlock();
             		sendMessage(session, makeJson(comParaMeter(session)));
+	            	if(roomList.get(romid).anotherUserCheck(session)) {
+	            		Session anoSession = roomList.get(romid).anotherUser(session);
+	            		sendMessage(anoSession, makeJson(comParaMeter(anoSession, "gaming", "convert")));
+	            	}
+            		
             	}
             }
             else {
@@ -155,7 +177,7 @@ public class WebSocket {
             //#룸에 다른 사람이 있을시 상대방에게 유저가 나갔다는 알림을 줌
             
             if(roomList.get(roomId).anotherUserCheck(session)) {
-            	sendMessage(roomList.get(roomId).anotherUser(session), makeJson(sendUserInfo(roomList.get(roomId).anotherUser(session), "유저 나감")));
+            	sendMessage(roomList.get(roomId).anotherUser(session), makeJson(sendUserInfo(roomList.get(roomId).anotherUser(session), "다른 유저 나감")));
             	
             }
             
@@ -165,6 +187,9 @@ public class WebSocket {
             roomList.get(roomId).userOut(session);
 
         }
+        
+        
+        
     }
 
     
@@ -319,8 +344,10 @@ public class WebSocket {
 		return curHash;
 	}
 
-	//게임진행 공통 파라미터 모음 (다른 한명이 나가거나 ready, restart를 눌렀을때 사용)
+	//게임진행 공통 파라미터 모음 (다른 한명에게 메시지랑 함께 보낼때 사용)
 	public HashMap comParaMeter(Session session, String status, String mesg) {
+		
+		if (session != null) {
 		Integer romid = userRoomInfo.get(session);
 		
 		HashMap curHash = roomList.get(romid).getGaming().getHash();
@@ -330,9 +357,15 @@ public class WebSocket {
 		curHash.put("nextBlock", roomList.get(romid).getGaming().getNextBlock() );
 		
 		//status 및 상태메시지 추가
-		curHash.put("status", status );
+		curHash.put("status", "gaming" );
 		curHash.put("mesg", mesg );
 		return curHash;
+		
+		}
+		//메시지 보내기 직전 close()되어 session이 없을 경우 null 보냄
+		else {
+			return new HashMap();
+		}
 	}
 	
 	//현재 게임 상태 객체로 만들어서 반환
