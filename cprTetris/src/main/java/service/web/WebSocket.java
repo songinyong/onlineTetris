@@ -60,10 +60,12 @@ public class WebSocket {
             		makeRoomCheck = false ;
             		r.userJoin(session);
             		userRoomInfo.put(session, r.getRoomId());
-            		session.getAsyncRemote().sendText(makeJson(sendUserInfo(session, "유저 들어옴")));
+            		
+            		sendMessage(session, makeJson(sendUserInfo(session, "접속성공")));
             		
             		//상대방에게도 메시지 보냄
-            		session.getAsyncRemote().sendText(makeJson(sendUserInfo(r.anotherUser(session), "유저 들어옴")));
+            		sendMessage(r.anotherUser(session), makeJson(sendUserInfo(r.anotherUser(session), "다른 유저 들어옴")));
+
             	}
             	
             }
@@ -83,7 +85,10 @@ public class WebSocket {
         }
        
     }
-    
+	
+	
+	//상대방에게도 메시지 보냄
+
     /**
      * 웹소켓 메시지(From Client) 수신하는 경우 호출
      */
@@ -100,7 +105,8 @@ public class WebSocket {
             	
             	 //#룸에 다른 사람이 있을시 상대방에게 start 버튼을 클릭했다는 알림을 줌
             	if(roomList.get(romid).anotherUserCheck(session))
-            	session.getAsyncRemote().sendText(makeJson(sendUserInfo(roomList.get(romid).anotherUser(session), "다른 유저가 start 클릭함")));
+            		sendMessage(roomList.get(romid).anotherUser(session), makeJson(sendUserInfo(roomList.get(romid).anotherUser(session), "다른 유저가 start 클릭함")));
+            	
             		//모든 유저가 시작을 눌렀을시 게임 시작
 	            if(roomList.get(romid).userAllReStart()) {
 	            	roomList.get(romid).setGaming(new Gaming());
@@ -113,19 +119,20 @@ public class WebSocket {
             else if(message.equals("left") && roomList.get(romid).getGaming().getMakedBlock() ) {
 	            if(roomList.get(romid).getGaming().getStartCheck()) {
 	            	roomList.get(romid).getGaming().leftMove();
-	            	session.getAsyncRemote().sendText(makeJson(comParaMeter(session)));
+	            	sendMessage(session, makeJson(comParaMeter(session)));
+	            	
 	            }
             }
             else if(message.equals("right") && roomList.get(romid).getGaming().getMakedBlock() ) {
             	if(roomList.get(romid).getGaming().getStartCheck()) {
             		roomList.get(romid).getGaming().rightMove();
-            		session.getAsyncRemote().sendText(makeJson(comParaMeter(session)));
+            		sendMessage(session, makeJson(comParaMeter(session)));
             	}
             }
             else if(message.equals("convert") && roomList.get(romid).getGaming().getMakedBlock() ) {
             	if(roomList.get(romid).getGaming().getStartCheck())  {        	
             		roomList.get(romid).getGaming().convertBlock();
-            		session.getAsyncRemote().sendText(makeJson(comParaMeter(session)));
+            		sendMessage(session, makeJson(comParaMeter(session)));
             	}
             }
             else {
@@ -148,7 +155,8 @@ public class WebSocket {
             //#룸에 다른 사람이 있을시 상대방에게 유저가 나갔다는 알림을 줌
             
             if(roomList.get(roomId).anotherUserCheck(session)) {
-            	session.getAsyncRemote().sendText(makeJson(sendUserInfo(roomList.get(roomId).anotherUser(session), "유저 나감")));
+            	sendMessage(roomList.get(roomId).anotherUser(session), makeJson(sendUserInfo(roomList.get(roomId).anotherUser(session), "유저 나감")));
+            	
             }
             
             //세션리스트에서 제거
@@ -223,7 +231,8 @@ public class WebSocket {
 					
 					roomList.get(romid).getGaming().gaming();
 					HashMap sendInfo = comParaMeter(sessionList.get(k), "gaming", "");
-					sessionList.get(k).getAsyncRemote().sendText(makeJson(sendInfo));
+					sendMessage(sessionList.get(k), makeJson(sendInfo));
+					
 				}
 				//방에 2명이서 플레이 중일경우
 				else {
@@ -234,7 +243,8 @@ public class WebSocket {
 						boolean gamestatus = roomList.get(romid).getGaming().gaming();
 						//전달할 게이밍 정보 생성
 						HashMap sendInfo = comParaMeter(sessionList.get(k), "gaming", "");
-						sessionList.get(k).getAsyncRemote().sendText(makeJson(sendInfo));
+						sendMessage(sessionList.get(k), makeJson(sendInfo));
+						
 						
 						roomList.get(romid).setGamingCheck(true);
 						
@@ -243,8 +253,7 @@ public class WebSocket {
 					else {
 						//전달할 게이밍 정보 생성
 						HashMap sendInfo = comParaMeter(sessionList.get(k), "gaming", "");
-						sessionList.get(k).getAsyncRemote().sendText(makeJson(sendInfo));
-						
+						sendMessage(sessionList.get(k), makeJson(sendInfo));
 						roomList.get(romid).setGamingCheck(false);
 					}
 			}
@@ -259,29 +268,30 @@ public class WebSocket {
 			
 		}
 				
-		
 	}
 	
 	//유저 들어오거나 나갈때 메시지 보냄
 	public HashMap sendUserInfo(Session session, String mesg) {
-		Integer romid = userRoomInfo.get(session);
 		
 		HashMap userHash = new HashMap();
-
+		if (session != null) {
+		Integer romid = userRoomInfo.get(session);
+		
 		userHash.put("numOfUser", sessionList.size() );
 		userHash.put("userId", session.getId() );
 		userHash.put("roomId", romid);
 		
 		if(roomList.get(romid).anotherUserCheck(session)) {
-			userHash.put("anoUserId", roomList.get(romid).anotherUser(session));
+			userHash.put("anoUserId", roomList.get(romid).anotherUser(session).getId());
 		}
 		else 
 			userHash.put("anoUserId", "");		
 			userHash.put("status", "userStatus" );
 			userHash.put("mesg", mesg );
 		//다른 유저 들어오고 나가나는 status 메시지 추가
-		
+		}
 		return userHash ;
+		
 		
 	}
 
@@ -294,7 +304,6 @@ public class WebSocket {
 		curHash.put("block", roomList.get(romid).getGaming().getBlockLoc() );
 		curHash.put("score", roomList.get(romid).getGaming().getScore() );
 		curHash.put("numOfUser", sessionList.size() );
-		curHash.put("userId", session.getId() );
 		curHash.put("nextBlock", roomList.get(romid).getGaming().getNextBlock() );
 		
 		//status 및 상태메시지 추가
@@ -318,7 +327,6 @@ public class WebSocket {
 		curHash.put("block", roomList.get(romid).getGaming().getBlockLoc() );
 		curHash.put("score", roomList.get(romid).getGaming().getScore() );
 		curHash.put("numOfUser", sessionList.size() );
-		curHash.put("userId", session.getId() );
 		curHash.put("nextBlock", roomList.get(romid).getGaming().getNextBlock() );
 		
 		//status 및 상태메시지 추가
@@ -328,15 +336,25 @@ public class WebSocket {
 	}
 	
 	//현재 게임 상태 객체로 만들어서 반환
-	public String makeJson(HashMap data) {
+	private String makeJson(HashMap data) {
+		
 		ObjectMapper mapper = new ObjectMapper();
 		try {
 			String json = mapper.writeValueAsString(data);
 			return json ;
 		} catch (JsonProcessingException e) {
+			System.out.println("json 에러");
 			return "";
 		}
 	}
+	
+	private void sendMessage(Session session, String mesg) {
+		if (session != null) {
+			if(session.isOpen() && mesg !="" && mesg !=null)
+				session.getAsyncRemote().sendText(mesg);
+		}
+	}
+	
 	
 	
 }	

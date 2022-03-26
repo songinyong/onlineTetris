@@ -111,7 +111,8 @@ public class Room {
 	//방의 다른 유저 정보 전달
 	public Session anotherUser(Session user ) {
 		for(int i=0; i<2; i++) {
-			if(!userList[i].equals(user) && userList[i] != null) 
+			if(userList[i] != null) 
+				if(!userList[i].equals(user))
 				return userList[i];
 		}
 		
