@@ -27,3 +27,8 @@ webSocket 기반으로 만들고 있습니다.
 ![협력모드 설명창0](https://user-images.githubusercontent.com/30370933/160237915-d7e9fcdc-cd82-4889-bdda-9f93ba9cf34b.PNG)
 
 ![협력모드 설명창](https://user-images.githubusercontent.com/30370933/160237920-5f99d703-53a8-49c2-bf20-4f149df27de0.PNG)
+
+
+테스트용 플레이 링크:
+http://3.35.55.132:8081/
+pvp모드 개발전 설계 수정 작업을 진행중입니다. 
