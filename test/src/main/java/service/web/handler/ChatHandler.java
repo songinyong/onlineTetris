@@ -32,7 +32,7 @@ public class ChatHandler extends TextWebSocketHandler  {
     @Override
     protected void handleTextMessage(WebSocketSession session, TextMessage message) throws Exception {
         String payload = message.getPayload();
-        
+        sessionList.add(session);
         for(WebSocketSession sess: sessionList) {
             sess.sendMessage(message);
         }
@@ -53,7 +53,7 @@ public class ChatHandler extends TextWebSocketHandler  {
     /* Client가 접속 해제 시 호출되는 메서드드 */
     @Override
     public void afterConnectionClosed(WebSocketSession session, CloseStatus status) throws Exception {
-    	
+    	sessionList.remove(session);
         for(WebSocketSession sess: sessionList) {
             sess.sendMessage(new TextMessage("유저 나감"));
         }
