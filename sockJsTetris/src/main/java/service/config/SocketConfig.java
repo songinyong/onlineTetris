@@ -9,6 +9,8 @@ import org.springframework.web.socket.config.annotation.WebSocketHandlerRegistry
 import lombok.RequiredArgsConstructor;
 import service.web.Intercepter.IpHandshakeInterceptor;
 import service.web.handler.ChatHandler;
+import service.web.handler.RedisChatHandler;
+import service.webservice.GameService;
 //import service.web.WebSocket;
 import service.webservice.UserService;
 
@@ -24,8 +26,8 @@ public class SocketConfig implements WebSocketConfigurer{
 	}
 
 	*/
-    private final ChatHandler chatHandler;
-
+    //private final ChatHandler chatHandler;
+	private final RedisChatHandler chatHandler;
     
     
     @Override
@@ -43,5 +45,10 @@ public class SocketConfig implements WebSocketConfigurer{
 	public void setUserService(UserService userService) {
 		chatHandler.userService = userService ;
 	}
+	
+	@Autowired
+	public void setGameService(GameService gameService) {
+		chatHandler.gameService = gameService ;
+	}	
 	
 }

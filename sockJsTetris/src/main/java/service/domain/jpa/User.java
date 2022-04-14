@@ -35,7 +35,6 @@ public class User extends CreateTimeEntity {
 	@Column()
 	private String session ;
 	
-	
 	@Column()
 	private String userid ;
 	

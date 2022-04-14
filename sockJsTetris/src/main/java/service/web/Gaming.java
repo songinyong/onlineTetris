@@ -37,7 +37,7 @@ public class Gaming {
 	private final int columns = 6;
 	
 	//점수
-	private  int score = 0;
+	private int score = 0;
 	
 	//websocket에서 게임이 시작여부를 체크할때 사용함 (처음 시작인지 재시작인지 여부를 판단할때 사용한다.)
 	private boolean startCheck = false ;
@@ -91,8 +91,6 @@ public class Gaming {
 		
 		int rand =random.nextInt(5);
 		
-
-
 		try {
 		if(rand ==0) {
 			laningBlock = new UBlock(columns) ;
@@ -128,15 +126,9 @@ public class Gaming {
 	
 	private boolean makeBlock(Block block) {
 		
-		
 		laningBlock = block;
 			
-		
-		
 		int rand =random.nextInt(5);
-		
-
-
 		try {
 		if(rand ==0) {
 			nextBlock = new UBlock(columns) ;
