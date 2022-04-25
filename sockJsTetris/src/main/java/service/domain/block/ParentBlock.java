@@ -11,10 +11,13 @@ package service.domain.block;
 
 
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
-public class ParentBlock implements Block{
+public class ParentBlock implements Block, Serializable{
+    
+    private static final long serialVersionUID = 2327692830319429806L;
 
 	protected  ArrayList<Node> block = new ArrayList<Node>();
 	

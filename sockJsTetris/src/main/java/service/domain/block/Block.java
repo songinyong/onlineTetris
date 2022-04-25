@@ -7,7 +7,7 @@ package service.domain.block;
 
 import java.util.List;
 
-public interface Block {
+public interface Block  {
 
 	//block 상태 알려줌
 	List<Node> getBlock() ;
